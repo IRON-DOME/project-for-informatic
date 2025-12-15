@@ -2,7 +2,7 @@
 #include <vector>
 #include <cmath>
 
-//: GLM для матриц
+//  GLM для матриц
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -17,7 +17,7 @@ const float SPUTNIK_MASS =1400.0f;
 const float ENERGY = -1.0e3f;
 const float GM = G * EARTH_MASS;
 ///////мои константы
-
+const float TIME_SCALE = 1000.0f;
 
 ///////
 float gpsHeight = 20200000.0f;
@@ -46,7 +46,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 const GLuint WIDTH = 800, HEIGHT = 600;
 
 
-// тцт щеёдеры
+// Шейдерочки
 const GLchar* vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec3 color;\n"
@@ -306,6 +306,11 @@ void update_satellite_position(float dt) {
     
     float v_radial = sqrt(2.0f * (GM / r + ENERGY / SPUTNIK_MASS) - (r * W) * (r * W));
     
+    // проверочка на NAN(ты не пройдёшь!!!!!)
+    if (v_radial != v_radial) { 
+        v_radial = 0.0f;
+    }
+    
     float vx = v_radial * (sat_x / r) - (r * W) * (sat_y / r_xy);
     float vy = v_radial * (sat_y / r) + (r * W) * (sat_x / r_xy);
     float vz = v_radial * (sat_z / r);
@@ -319,7 +324,7 @@ void update_sputnik_vertices(sputnik& sat, float centerX, float centerY, float c
     sat.vertices.clear();
     float R = size / 2.0f;
     
-    // 8 вершин куба
+    // это кубик
     sat.vertices.push_back(centerX + R);
     sat.vertices.push_back(centerY - R);
     sat.vertices.push_back(centerZ + R);
@@ -352,7 +357,7 @@ void update_sputnik_vertices(sputnik& sat, float centerX, float centerY, float c
     sat.vertices.push_back(centerY + R);
     sat.vertices.push_back(centerZ + R);
     
-    // 8 вершин антенн
+    // антенка
     float ant_offset = R * 0.5f;
     
     sat.vertices.push_back(centerX + ant_offset);
@@ -428,17 +433,17 @@ Planet genPlanet(float radius, int Ashag, int Bshag){
             earth.indices.push_back(bottomLeft);
             earth.indices.push_back(bottomRight);
             earth.indices.push_back(topRight);
-            
+            ///разбиваем на квадратики залёные земля наша
             float r, g, b;
-            if ((i >= 3 && i < 11 && j >= 5 && j < 13) ||    // квадрат 1
-                (i >= 3 && i < 11 && j >= 18 && j < 26) ||   // квадрат 2
-                (i >= 15 && i < 23 && j >= 7 && j < 15) ||   // квадрат 3  
-                (i >= 18 && i < 26 && j >= 22 && j < 30) ||  // квадрат 4
-                (i >= 10 && i < 14 && j >= 10 && j < 14) ||  // остров 1
-                (i >= 5 && i < 9 && j >= 25 && j < 29) ||    // остров 2
-                (i >= 20 && i < 24 && j >= 2 && j < 6) ||    // остров 3
-                (i >= 25 && i < 29 && j >= 15 && j < 19) ||  // остров 4
-                (i >= 12 && i < 16 && j >= 30 && j < 34)) {  // остров 5
+            if ((i >= 3 && i < 11 && j >= 5 && j < 13) ||    
+                (i >= 3 && i < 11 && j >= 18 && j < 26) ||   
+                (i >= 15 && i < 23 && j >= 7 && j < 15) ||     
+                (i >= 18 && i < 26 && j >= 22 && j < 30) || 
+                (i >= 10 && i < 14 && j >= 10 && j < 14) ||
+                (i >= 5 && i < 9 && j >= 25 && j < 29) ||   
+                (i >= 20 && i < 24 && j >= 2 && j < 6) ||    
+                (i >= 25 && i < 29 && j >= 15 && j < 19) || 
+                (i >= 12 && i < 16 && j >= 30 && j < 34)) {  
                 r = 0.0f; g = 0.8f; b = 0.0f;
             } else {
                 r = 0.0f; g = 0.0f; b = 0.8f;
@@ -467,7 +472,7 @@ Planet genPlanet(float radius, int Ashag, int Bshag){
 }
 /////
 void update_cord(Planet& earth){
-    float result = W * (glfwGetTime());
+    float result = W * (glfwGetTime()* TIME_SCALE);
     for(int i = 0; i < earth.vertices.size(); i = i+3) {
         float a = earth.n_vertices[i];
         float b = earth.n_vertices[i+1];
@@ -536,11 +541,6 @@ Axes genAxes(float length = 2.0f) {
     
     return axes;
 }
-/////////балуемся с физикой
-
- 
-
-/////////балуемся с физикой
 
 ////
 int main()
@@ -604,7 +604,7 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    // ПОЛУЧАЕМ LOCATION UNIFORM ПЕРЕМЕННЫХ (ИЗМЕНИЛ)
+    // локацию для шейдера берём
     GLint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
     GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
 
@@ -640,7 +640,7 @@ int main()
     sat_x = orbitRadius * sin(orbitAngle) * cos(SPUTNIK_RADIAN);
     sat_y = orbitRadius * cos(orbitAngle);
     sat_z = orbitRadius * sin(orbitAngle) * sin(SPUTNIK_RADIAN);
-    ///для спутника (ИЗМЕНИЛ позицию)
+    ///для спутника 
     sputnik satellite = genSputnik(0.09f, sat_x*MASHTAB, sat_y*MASHTAB, sat_z*MASHTAB);
 
     GLuint sputnikVAO, sputnikVBO, sputnikEBO, sputnikColorVBO;
@@ -703,11 +703,11 @@ int main()
         float dt = currentTime - lastTime;
         lastTime = currentTime;
         processCameraMovement(dt); 
-        dt *= 1000.0f;
         
-
         update_cord(earth);
-        update_satellite_position(dt);
+        
+        
+        update_satellite_position(dt * TIME_SCALE); 
 
         // Обновляем центр спутника
         satellite.center[0] = sat_x * MASHTAB;
@@ -727,14 +727,14 @@ int main()
         
         glUseProgram(shaderProgram);
         
-        // матрица камеры
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
         
-       glm::mat4 view = glm::lookAt(
-        camera.position,
-        camera.position + camera.front,
-        camera.up
-    );
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 10000.0f);
+        
+        glm::mat4 view = glm::lookAt(
+            camera.position,
+            camera.position + camera.front,
+            camera.up
+        );
 
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -773,4 +773,3 @@ int main()
     glfwTerminate();
     return 0;
 }
-
