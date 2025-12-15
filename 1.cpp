@@ -2,7 +2,7 @@
 #include <vector>
 #include <cmath>
 
-// ДОБАВИЛ: GLM для матриц
+//: GLM для матриц
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
