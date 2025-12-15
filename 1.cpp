@@ -46,7 +46,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 const GLuint WIDTH = 800, HEIGHT = 600;
 
 
-// ВЕРШИННЫЙ ШЕЙДЕР С МАТРИЦАМИ (ИЗМЕНИЛ)
+// тцт щеёдеры
 const GLchar* vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec3 color;\n"
@@ -67,7 +67,7 @@ const GLchar* vertexShaderSource = "#version 330 core\n"
     "    \n"
     "    gl_Position = projection * view * vec4(pos, 1.0);\n"
     "}\0";
-// ФРАГМЕНТНЫЙ ШЕЙДЕР С ЦВЕТОМ (БЕЗ ИЗМЕНЕНИЙ)
+
 const GLchar* fragmentShaderSource = "#version 330 core\n"
     "in vec3 fragColor;\n"
     "out vec4 color;\n"
@@ -727,7 +727,7 @@ int main()
         
         glUseProgram(shaderProgram);
         
-        // МАТРИЦЫ КАМЕРЫ (ДОБАВИЛ)
+        // матрица камеры
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
         
        glm::mat4 view = glm::lookAt(
